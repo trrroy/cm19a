@@ -18,7 +18,7 @@ Changelog 0.20 - 3.0
     * e.g. cm19a_X10_USB.py A1 ON
     * Send only, you cannot receive commands via this approach becuase the device does not maintain a queue of commands received.
     * Relatively slow because the driver must initialise the device each time and then exit.
-    * This is the default mode of operation: MODE = 'Command Line'
+    * This is the default mode of operation: #######MODE = 'Command Line'
 - Added in-built HTTP server
     * Send and receive commands via a web browser, any app that supports http, or even the command line (using cURL)
     * e.g. http://192.168.1.3:8008/?house=A&unit=1&command=ON
@@ -84,8 +84,8 @@ TTDs
 
 LOGFILE = './cm19a.log'             # Path and filename for the logfile
 
-MODE = 'Command Line'              # Mode of operation: either 'Command Line', 'HTTP Server'
-#MODE = 'HTTP Server'
+#######MODE = 'Command Line'              # Mode of operation: either 'Command Line', 'HTTP Server'
+MODE = 'HTTP Server'
 
 # Required only if MODE == 'HTTP Server'
 SERVER_IP_ADDRESS = '192.168.1.143'              # Set SERVERIP to the IP address of the server
@@ -706,9 +706,16 @@ class HTTPhandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 f.close()
                 response += "</body></html>"
         else:
-            # error no command request
-            respcode = 400
-            response = "NAK: Invalid 'command' value"
+            
+            respcode = 200
+            if self.path == '/' or self.path == '/index.html':
+              filepath = 'homieremotie/assets/www/index.html'
+            else:
+              filepath = 'homieremotie/assets/www' + self.path
+            # endif
+            with open (filepath, "r") as myfile:
+              data=myfile.read()
+            response = data
 
         if type(response) == types.BooleanType:
             if response:
