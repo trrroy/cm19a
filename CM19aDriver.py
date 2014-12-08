@@ -18,7 +18,7 @@ Changelog 0.20 - 3.0
     * e.g. cm19a_X10_USB.py A1 ON
     * Send only, you cannot receive commands via this approach becuase the device does not maintain a queue of commands received.
     * Relatively slow because the driver must initialise the device each time and then exit.
-    * This is the default mode of operation: #######MODE = 'Command Line'
+    * This is the default mode of operation: ##########MODE = 'Command Line'
 - Added in-built HTTP server
     * Send and receive commands via a web browser, any app that supports http, or even the command line (using cURL)
     * e.g. http://192.168.1.3:8008/?house=A&unit=1&command=ON
@@ -84,7 +84,7 @@ TTDs
 
 LOGFILE = './cm19a.log'             # Path and filename for the logfile
 
-#######MODE = 'Command Line'              # Mode of operation: either 'Command Line', 'HTTP Server'
+#MODE = 'Command Line'              # Mode of operation: either 'Command Line', 'HTTP Server'
 MODE = 'HTTP Server'
 
 # Required only if MODE == 'HTTP Server'
@@ -707,15 +707,22 @@ class HTTPhandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 response += "</body></html>"
         else:
             
-            respcode = 200
-            if self.path == '/' or self.path == '/index.html':
-              filepath = 'homieremotie/assets/www/index.html'
+            if os.path.exists("homieremotie/assets/www/index.html"): 
+              respcode = 200
+              if self.path == '/' or self.path == '/index.html':
+                filepath = 'homieremotie/assets/www/index.html'
+              else:
+                filepath = 'homieremotie/assets/www' + self.path
+              # endif
+              try:
+                with open (filepath, "r") as myfile:
+                  data=myfile.read()
+              except EnvironmentError: 
+                data = '' 
+              response = data
             else:
-              filepath = 'homieremotie/assets/www' + self.path
-            # endif
-            with open (filepath, "r") as myfile:
-              data=myfile.read()
-            response = data
+                reposcode = 500
+                response = "NAK"
 
         if type(response) == types.BooleanType:
             if response:
